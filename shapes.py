@@ -54,6 +54,40 @@ class Squares(object):
         if square["y"] - square["height"] < 0:
             square["diry"] = -square["diry"]
 
+class Triangles(object):
+
+    def __init__(self, screen, display, triangles_list):
+        self.screen = screen
+        self.display = display
+        self.triangles_list = triangles_list
+
+    def drawTriangles(self):
+        for triangle in self.triangles_list:
+            pygame.draw.polygon(self.display, triangle["color"], triangle["points"], triangle["fill"])
+        pygame.display.update()
+        for triangle in self.triangles_list:
+            self.trianglesUpdate(triangle)
+
+    def trianglesUpdate(self, triangle):
+        points = triangle["points"]
+        new_points = []
+        for point in points:
+            new_point = []
+            for c in point:
+                c += triangle["dirx"]
+                new_point.append(c)
+            new_points.append(new_point)
+
+        triangle["points"] = new_points  
+        if max(new_points)[0] + triangle["dirx"] > self.screen[0]:
+            triangle["dirx"] = -triangle["dirx"]
+        if max(new_points)[1] + triangle["diry"] > self.screen[1]:
+            triangle["diry"] = -triangle["diry"]
+        if min(new_points)[0] + triangle["dirx"] < 0:
+            triangle["dirx"] = -triangle["dirx"]
+        if min(new_points)[1] + triangle["diry"] < 0:
+            triangle["diry"] = -triangle["diry"]
+
 class Rectangles(object):
 
     def __init__(self, screen, display, rectangles_list):
@@ -95,8 +129,17 @@ def getSquares():
     sq3 = {"x" : 700, "y" : 500, "width" : 75, "height": 75, "dirx" : 15, "diry" : 15, "color" : (155, 155, 0), "fill" : 0}
     sq4 = {"x" : 250, "y" : 575, "width" : 75, "height": 75, "dirx" : 5, "diry" : 5, "color" : (255, 155, 100), "fill" : 0}
     sq5 = {"x" : 400, "y" : 300, "width" : 25, "height": 25, "dirx" : 25, "diry" : 25, "color" : (0, 155, 155), "fill" : 0}
-    sq6 = {"x" : 25, "y" : 525, "width" : 60, "height": 60, "dirx" : 2, "diry" : 2, "color" : (155, 155, 155), "fill" : 3}
+    sq6 = {"x" : 25, "y" : 525, "width" : 60, "height": 60, "dirx" : 2, "diry" : 2, "color" : (190, 5, 5), "fill" : 3}
     return [sq1, sq2, sq3, sq4, sq5, sq6]
+
+def getTriangles():
+    tri1 = {"points": ((750, 90), (291, 106), (236, 277)), "dirx" : 5, "diry" : 5, "color" : (255, 0, 0), "fill" : 5}
+    tri2 = {"points": ((700, 10), (775, 50), (750, 90)), "dirx" : 3, "diry" : 3, "color" : (0, 155, 0), "fill" : 0}
+    tri3 = {"points": ((291, 106), (146, 0), (236, 277)), "dirx" : 15, "diry" : 15, "color" : (155, 155, 0), "fill" : 5}
+    tri4 = {"points": ((10, 10), (100, 100), (100, 300)), "dirx" : 5, "diry" : 5, "color" : (255, 155, 0), "fill" : 0}
+    tri5 = {"points": ((236, 277), (146, 0), (291, 106)), "dirx" : 25, "diry" : 25, "color" : (0, 155, 155), "fill" : 5}
+    tri6 = {"points": ((100, 300), (750, 90), (100, 100)), "dirx" : 2, "diry" : 2, "color" : (155, 155, 155), "fill" : 0}
+    return [tri1, tri2, tri3, tri4, tri5, tri6]
 
 def getRectangles():
     rec1 = {"x" : 25, "y" : 525, "width" : 50, "height": 150, "dirx" : 5, "diry" : 5, "color" : (0, 255, 0), "fill" : 5}
@@ -113,23 +156,30 @@ def main():
     clock = pygame.time.Clock()
     screen = (900, 700)
     display = pygame.display.set_mode(screen)
-    bg_img = pygame.image.load("bg_img.png")
+    circles_bg_img = pygame.image.load("circle.png")
+    squares_bg_img = pygame.image.load("square.jpg")
+    triangles_bg_img = pygame.image.load("triangle.jpg")
+    rectangles_bg_img = pygame.image.load("rectangle.jpg")
+    bg_img = circles_bg_img
+
     pygame.display.set_caption("Shapes")
     circles_list = getCircles()
     circles = Circles(screen, display, circles_list)
     squares_list = getSquares()
     squares = Squares(screen, display, squares_list)
+    triangles_list = getTriangles()
+    triangles = Triangles(screen, display, triangles_list)
     rectangles_list = getRectangles()
     rectangles = Rectangles(screen, display, rectangles_list)
     done = False
 
     while not done:
         display.blit(bg_img, (0,0))
-        shapeName = pygame.font.Font('freesansbold.ttf', 30).render(shape, 1, (155, 155, 155))
+        shapeName = pygame.font.Font('freesansbold.ttf', 30).render(shape, 1, (190, 0, 0))
         shapeRect = shapeName.get_rect()
         shapeRect.topleft = (390, 10)
         display.blit(shapeName, shapeRect)
-        clickInfo = pygame.font.Font('freesansbold.ttf', 20).render("click on the shape name", 1, (155, 155, 155))
+        clickInfo = pygame.font.Font('freesansbold.ttf', 20).render("click on the shape name", 1, (190, 0, 0))
         clickRect = clickInfo.get_rect()
         clickRect.topleft = (350, 670)
         display.blit(clickInfo, clickRect)
@@ -142,14 +192,24 @@ def main():
             if event.type == pygame.QUIT:
                 done = True
         if (shape == "CIRCLE"):   
-            # circle_sound = pygame.mixer.Sound('circle.wma')
-            # circle_sound.play()
+            bg_img = circles_bg_img
+            circle_sound = pygame.mixer.Sound('circle.ogg')
+            circle_sound.play()
             circles.drawCircles()
         elif (shape == "SQUARE"):
+            bg_img = squares_bg_img
+            square_sound = pygame.mixer.Sound('square.ogg')
+            square_sound.play()
             squares.drawSquares()
         elif (shape == "TRIANGLE"):
-            pygame.display.update()
+            bg_img = triangles_bg_img
+            triangle_sound = pygame.mixer.Sound('triangle.ogg')
+            triangle_sound.play()
+            triangles.drawTriangles()
         elif (shape == "RECTANGLE"):
+            bg_img = rectangles_bg_img
+            rectangle_sound = pygame.mixer.Sound('rectangle.ogg')
+            rectangle_sound.play()
             rectangles.drawRectangles()
 
         clock.tick(60)
@@ -159,7 +219,7 @@ def main():
 def update_shape(display):
     global shape
     if shape == "CIRCLE":
-        shape = "SQUARE" 
+        shape = "SQUARE"
     elif shape == "SQUARE":
         shape = "TRIANGLE"
     elif shape == "TRIANGLE":
