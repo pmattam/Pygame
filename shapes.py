@@ -174,7 +174,7 @@ def main():
     done = False
 
     while not done:
-        display.blit(bg_img, (0,0))
+        display.blit(bg_img, (0, 0))
         shapeName = pygame.font.Font('freesansbold.ttf', 30).render(shape, 1, (190, 0, 0))
         shapeRect = shapeName.get_rect()
         shapeRect.topleft = (390, 10)
@@ -183,7 +183,7 @@ def main():
         clickRect = clickInfo.get_rect()
         clickRect.topleft = (350, 670)
         display.blit(clickInfo, clickRect)
-
+    
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONUP:
                 position = pygame.mouse.get_pos()
